@@ -16,3 +16,21 @@ The main goals of this new API are:
 The current status of this new API can be checked [here](https://github.com/go-shiori/shiori/issues/640).
 
 Since the API is self-docummented, you can check the API documentation by [running the server locally](./Contribute.md#running-the-server-locally) and visiting the [`/swagger/index.html` endpoint](http://localhost:8080/swagger/index.html).
+
+## Import bookmarks from the web interface
+
+`POST /api/v1/bookmarks/import` imports bookmarks from an uploaded Netscape Bookmark HTML file (as exported by Firefox, Chrome and other browsers). It accepts `multipart/form-data` with:
+
+- `file` (required): the Netscape Bookmark HTML file (up to 10 MB).
+- `generate_tag` (optional, `true`/`false`): add each bookmark's parent folder name as a tag, same as the `--generate-tag` flag of the CLI `import` command.
+
+The endpoint requires authentication and returns the number of created and skipped bookmarks plus a list of non-fatal parsing errors:
+
+```json
+{
+  "ok": true,
+  "message": { "created": 1, "skipped": 1, "errors": null, "parsed": [{ "title": "One", "url": "https://example.com/one" }] }
+}
+```
+
+Bookmarks whose URL already exists are skipped, mirroring the behavior of `shiori import`.

@@ -99,6 +99,10 @@ Once login succeed you will be able to use the web interface. To add the new acc
 
 ![Options page](https://raw.githubusercontent.com/go-shiori/shiori/master/docs/screenshots/04-options.png)
 
+### Importing bookmarks from the web interface
+
+On the settings page you can import bookmarks from a Netscape Bookmark HTML file (as exported by Firefox, Chrome and other browsers) without using the command line. Open the settings page, select the exported file in the "Import bookmarks" section, choose whether bookmark folders should be added as tags, and click "Import bookmarks". Bookmarks whose URL already exists will be skipped, the same way as the `shiori import` command.
+
 When searching for bookmarks, you may use `tag:tagname` to include tags and `-tag:tagname` to exclude tags in the search bar. You can also use tags dialog to do this :
 
 - `Click` on the tag name to include it;

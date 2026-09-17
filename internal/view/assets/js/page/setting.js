@@ -48,6 +48,25 @@ var template = `
                 Make bookmark publicly available by default
             </label>
         </details>
+        <details open class="setting-group" id="setting-import">
+            <summary>Import bookmarks</summary>
+            <p>Import bookmarks from a Netscape Bookmark HTML file (Firefox, Chrome and other browsers).</p>
+            <label>
+                Bookmark file &nbsp;
+                <input type="file" accept=".html,.htm,text/html" ref="importFile">
+            </label>
+            <label>
+                <input type="checkbox" v-model="importGenerateTag">
+                Use bookmark folders as tags
+            </label>
+            <div class="setting-group-footer">
+                <a @click="importBookmarks" title="Import bookmarks">{{ importing ? "Importing..." : "Import bookmarks" }}</a>
+            </div>
+            <p v-if="importResult" class="import-result">
+                Imported {{ importResult.created }} bookmark(s),
+                skipped {{ importResult.skipped }} duplicate(s).
+            </p>
+        </details>
         <details v-if="activeAccount.owner" open class="setting-group setting-accounts" id="setting-accounts">
             <summary>Accounts</summary>
             <ul class="accounts-list">
@@ -100,7 +119,7 @@ var template = `
 
 import customDialog from "../component/dialog.js";
 import basePage from "./base.js";
-import { apiRequest } from "../utils/api.js";
+import { apiRequest, handleApiError } from "../utils/api.js";
 
 export default {
 	template: template,
@@ -113,9 +132,51 @@ export default {
 			loading: false,
 			accounts: [],
 			system: {},
+			importGenerateTag: false,
+			importing: false,
+			importResult: null,
 		};
 	},
 	methods: {
+		async importBookmarks() {
+			if (this.importing) return;
+
+			const fileInput = this.$refs.importFile;
+			if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+				this.showErrorDialog("Please select a bookmarks HTML file to import.");
+				return;
+			}
+
+			const file = fileInput.files[0];
+			const formData = new FormData();
+			formData.append("file", file);
+			formData.append("generate_tag", this.importGenerateTag ? "true" : "false");
+
+			this.importing = true;
+			this.importResult = null;
+			try {
+				const response = await fetch(new URL("api/v1/bookmarks/import", document.baseURI), {
+					method: "post",
+					body: formData,
+					headers: {
+						Authorization: "Bearer " + localStorage.getItem("shiori-token"),
+					},
+				});
+
+				if (!response.ok) {
+					const error = await handleApiError(response);
+					throw new Error(error);
+				}
+
+				this.importResult = await response.json();
+				this.$root.reloadData && this.$root.reloadData();
+				fileInput.value = "";
+			} catch (err) {
+				this.showErrorDialog(err.message || "Failed to import bookmarks.");
+			} finally {
+				this.importing = false;
+			}
+		},
 		saveSetting() {
 			let options = {
 				ShowId: this.appOptions.ShowId,

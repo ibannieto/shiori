@@ -21,6 +21,22 @@ type BookmarksDomain interface {
 	AddTagToBookmark(ctx context.Context, bookmarkID int, tagID int) error
 	RemoveTagFromBookmark(ctx context.Context, bookmarkID int, tagID int) error
 	BookmarkExists(ctx context.Context, id int) (bool, error)
+	ParseImport(htmlContent string, generateTag bool) ImportedBookmarks
+	ImportBookmarks(ctx context.Context, parsed ImportedBookmarks, create bool) (*ImportResult, error)
+}
+
+// ImportedBookmarks holds the result of parsing an import file
+type ImportedBookmarks struct {
+	Bookmarks []BookmarkDTO
+	Errors    []string
+}
+
+// ImportResult holds the statistics of an import operation
+type ImportResult struct {
+	Created   int64
+	Skipped   int64
+	Errors    []string
+	Bookmarks []BookmarkDTO
 }
 
 type AuthDomain interface {

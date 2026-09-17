@@ -176,6 +176,11 @@ func (s *HttpServer) Setup(cfg *config.Config, deps *dependencies.Dependencies) 
 		api_v1.HandleBulkUpdateBookmarkTags,
 		globalMiddleware...,
 	))
+	// Import bookmarks from a Netscape Bookmark HTML file
+	s.mux.HandleFunc("POST /api/v1/bookmarks/import", ToHTTPHandler(deps,
+		api_v1.HandleImportBookmarks,
+		globalMiddleware...,
+	))
 	// Bookmark tags endpoints
 	s.mux.HandleFunc("GET /api/v1/bookmarks/{id}/tags", ToHTTPHandler(deps,
 		api_v1.HandleGetBookmarkTags,

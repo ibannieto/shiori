@@ -35,6 +35,13 @@ func WithBody(body string) Option {
 	}
 }
 
+// WithBodyReader sets the request body to the provided reader
+func WithBodyReader(body io.Reader) Option {
+	return func(c model.WebContext) {
+		c.Request().Body = io.NopCloser(body)
+	}
+}
+
 func WithHeader(name, value string) Option {
 	return func(c model.WebContext) {
 		c.Request().Header.Add(name, value)
