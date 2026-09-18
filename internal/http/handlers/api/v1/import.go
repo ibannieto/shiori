@@ -111,4 +111,12 @@ func HandleImportBookmarks(deps model.Dependencies, c model.WebContext) {
 	}
 
 	response.SendJSON(c, http.StatusOK, dto)
+
+	// Kick off a background refresh of titles and thumbnails for all
+	// bookmarks. Failures are logged by the job itself and progress is
+	// polled by the web interface.
+	if _, err := deps.Domains().RefreshJobs().StartJob(c.Request().Context()); err != nil {
+		// Already-running or database failure is not fatal for the import.
+		deps.Logger().WithError(err).Warn("could not start background refresh job")
+	}
 }

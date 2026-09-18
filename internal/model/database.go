@@ -34,6 +34,11 @@ type DB interface {
 	// SaveBookmarks saves bookmarks data to database.
 	SaveBookmarks(ctx context.Context, create bool, bookmarks ...BookmarkDTO) ([]BookmarkDTO, error)
 
+	// RefreshJob persistence (single row tracking one background job)
+	CreateRefreshJob(ctx context.Context, job RefreshJobDTO) error
+	UpdateRefreshJob(ctx context.Context, job RefreshJobDTO) error
+	GetLastRefreshJob(ctx context.Context) (*RefreshJobDTO, error)
+
 	// SaveBookmark saves a single bookmark to database without handling tags.
 	// It only updates the bookmark data in the database.
 	SaveBookmark(ctx context.Context, bookmark Bookmark) error

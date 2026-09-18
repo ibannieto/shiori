@@ -30,12 +30,13 @@ func (d *Dependencies) Database() model.DB {
 }
 
 type domains struct {
-	auth      model.AuthDomain
-	accounts  model.AccountsDomain
-	bookmarks model.BookmarksDomain
-	archiver  model.ArchiverDomain
-	storage   model.StorageDomain
-	tags      model.TagsDomain
+	auth        model.AuthDomain
+	accounts    model.AccountsDomain
+	bookmarks   model.BookmarksDomain
+	archiver    model.ArchiverDomain
+	storage     model.StorageDomain
+	tags        model.TagsDomain
+	refreshJobs model.RefreshJobDomain
 }
 
 func (d *domains) Auth() model.AuthDomain                       { return d.auth }
@@ -50,6 +51,8 @@ func (d *domains) Storage() model.StorageDomain                 { return d.stora
 func (d *domains) SetStorage(storage model.StorageDomain)       { d.storage = storage }
 func (d *domains) Tags() model.TagsDomain                       { return d.tags }
 func (d *domains) SetTags(tags model.TagsDomain)                { d.tags = tags }
+func (d *domains) RefreshJobs() model.RefreshJobDomain          { return d.refreshJobs }
+func (d *domains) SetRefreshJobs(r model.RefreshJobDomain)      { d.refreshJobs = r }
 
 var _ model.DomainDependencies = (*domains)(nil)
 

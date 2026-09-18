@@ -103,6 +103,8 @@ Once login succeed you will be able to use the web interface. To add the new acc
 
 On the settings page you can import bookmarks from a Netscape Bookmark HTML file (as exported by Firefox, Chrome and other browsers) without using the command line. Open the settings page, select the exported file in the "Import bookmarks" section, choose whether bookmark folders should be added as tags, and click "Import bookmarks". Bookmarks whose URL already exists will be skipped, the same way as the `shiori import` command.
 
+After the import finishes, a background job automatically refreshes the title, excerpt and thumbnail of every bookmark. The settings page shows live progress ("Refreshing: processed X of Y") while the job runs. Progress is stored in the database, so a job interrupted by restarting Shiori resumes automatically on startup. You can also trigger this refresh at any time with the "Refresh titles and thumbnails" button on the settings page.
+
 When searching for bookmarks, you may use `tag:tagname` to include tags and `-tag:tagname` to exclude tags in the search bar. You can also use tags dialog to do this :
 
 - `Click` on the tag name to include it;

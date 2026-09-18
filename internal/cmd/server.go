@@ -89,6 +89,9 @@ func newServerCommandHandler() func(cmd *cobra.Command, args []string) {
 
 		dependencies.Logger().Infof("Starting Shiori v%s", model.BuildVersion)
 
+		// Resume any refresh job that was interrupted by a restart
+		dependencies.Domains().RefreshJobs().ResumePendingJobs(cmd.Context())
+
 		server, err := http.NewHttpServer(dependencies.Logger()).Setup(cfg, dependencies)
 		if err != nil {
 			dependencies.Logger().WithError(err).Fatal("error setting up server")

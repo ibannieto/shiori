@@ -110,6 +110,7 @@ func initShiori(ctx context.Context, cmd *cobra.Command) (*config.Config, *depen
 	dependencies.Domains().SetBookmarks(domains.NewBookmarksDomain(dependencies))
 	dependencies.Domains().SetStorage(domains.NewStorageDomain(dependencies, afero.NewBasePathFs(afero.NewOsFs(), cfg.Storage.DataDir)))
 	dependencies.Domains().SetTags(domains.NewTagsDomain(dependencies))
+	dependencies.Domains().SetRefreshJobs(domains.NewRefreshJobDomain(dependencies))
 
 	// Workaround: Get accounts to make sure at least one is present in the database.
 	// If there's no accounts in the database, create the shiori/gopher account the legacy api

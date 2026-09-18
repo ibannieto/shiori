@@ -27,4 +27,6 @@ type DomainDependencies interface {
 	SetStorage(storage StorageDomain)
 	Tags() TagsDomain
 	SetTags(tags TagsDomain)
+	RefreshJobs() RefreshJobDomain
+	SetRefreshJobs(refresh RefreshJobDomain)
 }

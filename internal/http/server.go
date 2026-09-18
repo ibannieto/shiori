@@ -181,6 +181,15 @@ func (s *HttpServer) Setup(cfg *config.Config, deps *dependencies.Dependencies) 
 		api_v1.HandleImportBookmarks,
 		globalMiddleware...,
 	))
+	// Background refresh of bookmark titles and thumbnails
+	s.mux.HandleFunc("POST /api/v1/bookmarks/refresh", ToHTTPHandler(deps,
+		api_v1.HandleRefreshBookmarks,
+		globalMiddleware...,
+	))
+	s.mux.HandleFunc("GET /api/v1/bookmarks/refresh/progress", ToHTTPHandler(deps,
+		api_v1.HandleRefreshProgress,
+		globalMiddleware...,
+	))
 	// Bookmark tags endpoints
 	s.mux.HandleFunc("GET /api/v1/bookmarks/{id}/tags", ToHTTPHandler(deps,
 		api_v1.HandleGetBookmarkTags,

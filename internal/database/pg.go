@@ -70,6 +70,7 @@ var postgresMigrations = []migration{
 		return nil
 	}),
 	newFileMigration("0.3.0", "0.4.0", "postgres/0002_created_time"),
+	newFileMigration("0.4.0", "0.5.0", "postgres/0011_refresh_job"),
 }
 
 // PGDatabase is implementation of Database interface

@@ -66,6 +66,12 @@ var template = `
                 Imported {{ importResult.created }} bookmark(s),
                 skipped {{ importResult.skipped }} duplicate(s).
             </p>
+            <hr>
+            <p>Refresh titles and thumbnails of all bookmarks in the background.</p>
+            <div class="setting-group-footer">
+                <a @click="startRefresh" title="Refresh titles and thumbnails">{{ refreshStarting ? "Starting..." : "Refresh titles and thumbnails" }}</a>
+            </div>
+            <p v-if="refreshProgressText" class="import-result">{{ refreshProgressText }}</p>
         </details>
         <details v-if="activeAccount.owner" open class="setting-group setting-accounts" id="setting-accounts">
             <summary>Accounts</summary>
@@ -127,7 +133,7 @@ export default {
 	components: {
 		customDialog,
 	},
-	data() {
+		data() {
 		return {
 			loading: false,
 			accounts: [],
@@ -135,6 +141,9 @@ export default {
 			importGenerateTag: false,
 			importing: false,
 			importResult: null,
+			refreshStarting: false,
+			refreshProgressText: "",
+			refreshPoller: null,
 		};
 	},
 	methods: {
@@ -171,10 +180,55 @@ export default {
 				this.importResult = await response.json();
 				this.$root.reloadData && this.$root.reloadData();
 				fileInput.value = "";
+				this.startPollingProgress();
 			} catch (err) {
 				this.showErrorDialog(err.message || "Failed to import bookmarks.");
 			} finally {
 				this.importing = false;
+			}
+		},
+		async startRefresh() {
+			if (this.refreshStarting) return;
+
+			this.refreshStarting = true;
+			try {
+				await apiRequest(new URL("api/v1/bookmarks/refresh", document.baseURI), {
+					method: "post",
+				});
+				this.startPollingProgress();
+			} catch (err) {
+				this.showErrorDialog(err.message || "Failed to start refresh job.");
+			} finally {
+				this.refreshStarting = false;
+			}
+		},
+		startPollingProgress() {
+			if (this.refreshPoller) return;
+			this.refreshPoller = setInterval(() => this.pollRefreshProgress(), 1500);
+			this.pollRefreshProgress();
+		},
+		async pollRefreshProgress() {
+			try {
+				const progress = await apiRequest(
+					new URL("api/v1/bookmarks/refresh/progress", document.baseURI),
+				);
+				if (!progress || !progress.id || progress.total === 0) {
+					this.refreshProgressText = "";
+				} else if (progress.status === "running") {
+					this.refreshProgressText = "Refreshing: processed " + progress.completed +
+						" of " + progress.total + " (updated " + progress.updated +
+						", failed " + progress.failed + ")";
+				} else if (progress.status === "done") {
+					this.refreshProgressText = "Refresh finished: processed " + progress.completed +
+						" of " + progress.total + " (updated " + progress.updated +
+						", failed " + progress.failed + ")";
+					clearInterval(this.refreshPoller);
+					this.refreshPoller = null;
+					this.$root.reloadData && this.$root.reloadData();
+				}
+			} catch (err) {
+				clearInterval(this.refreshPoller);
+				this.refreshPoller = null;
 			}
 		},
 		saveSetting() {

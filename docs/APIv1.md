@@ -33,4 +33,22 @@ The endpoint requires authentication and returns the number of created and skipp
 }
 ```
 
-Bookmarks whose URL already exists are skipped, mirroring the behavior of `shiori import`.
+Bookmarks whose URL already exists are skipped, mirroring the behavior of `shiori import`. The import process automatically starts a background job that refreshes the title, excerpt and thumbnail of every bookmark.
+
+## Refresh titles and thumbnails in the background
+
+`POST /api/v1/bookmarks/refresh` starts a persistent background job that fetches every page stored in the database and updates each bookmark's title, excerpt and thumbnail in place, preserving tags and other fields. The job processes three bookmarks at a time with a 60-second timeout per bookmark and its progress is stored in the database, so it survives process restarts: if Shiori is restarted while a job is running, it resumes automatically during startup.
+
+The endpoint requires an admin account and immediately returns the job ID:
+
+```json
+{ "ok": true, "message": { "job_id": "3f0f9ac1-..." } }
+```
+
+Poll `GET /api/v1/bookmarks/refresh/progress` to display the job state:
+
+```json
+{ "ok": true, "message": { "id": "3f0f9ac1-...", "status": "running", "total": 500, "completed": 120, "updated": 115, "failed": 5 } }
+```
+
+The web interface settings page adds a "Refresh titles and thumbnails" button showing live progress while a job runs.
